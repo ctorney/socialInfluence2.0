@@ -97,15 +97,10 @@ int main()
 
     for (int G=0;G<wgCount;G++)
     {
-        float wg = 0.3;//5 + 0.2 * float(G);
+        float wg = 0.25;//5 + 0.2 * float(G);
         for (int i=0;i<N_ALL;i++)
-        {
             h_wg[i]=wg;
-            float unum =rand()/double(RAND_MAX);
-   //         cout<<unum<<endl;
- //           if (unum<0.2345)
- //               h_wg[i]+=0.833;
-        }
+
         CUDA_CALL(cudaMemcpy(d_wg, h_wg, (N_ALL) * sizeof(float), cudaMemcpyHostToDevice));
 
 
@@ -113,13 +108,13 @@ int main()
             h_blockTimes[b] = -1;
         int maxTime = 100000;
         int checkTime = 1000;
-        float sw = 0.15f;
+        int NL = 4;
         cout<<"~~~~~~~~~~~~~~~~~~~~"<<endl;
-        cout<<sw<<endl;
+        cout<<NL<<endl;
         cout<<"~~~~~~~~~~~~~~~~~~~~"<<endl;
 
         char fileName[30];
-        sprintf(fileName, "potential%d-%d.npy", int(10*wg),int(100.0*sw));
+        sprintf(fileName, "output/potential%d-%d.npy", int(10*wg),int(2.0*NL));
 //        cout<<fileName<<endl;
 
         CUDA_CALL(cudaMemset (d_states, 0, sizeof(int) * (N_ALL)));
@@ -136,7 +131,7 @@ int main()
         for (int t=0;t<maxTime;t++)
         {
             
-            advanceTimestep(threadGrid, numBlocks, devRands, d_wg, d_states, Nx, sw, t);
+            advanceTimestep(threadGrid, numBlocks, devRands, d_wg, d_states, Nx, NL, t);
             recordData(threadGrid, numBlocks, d_states, d_states2, devRands, Nx, d_up, d_down, d_upcount, d_downcount, t);
             /*
             CUDA_CALL(cudaMemcpy(h_states, d_states, (N_ALL) * sizeof(int), cudaMemcpyDeviceToHost));

@@ -116,7 +116,8 @@ __global__ void d_updateStates(int* states, float* wg, int N_x, curandState* d_r
 
     __syncthreads();
 
-    states[id] = newState;
+    if (myInd==t)
+        states[id] = newState;
 }
 
 __global__ void d_recordData(int* states, int* states2, curandState* d_rands,  int N_x, float* d_up, float* d_down, int* d_upcount, int* d_downcount, int t)
@@ -243,7 +244,8 @@ void initRands(dim3 threadGrid, int numBlocks, curandState *state, int seed)
 }
 void advanceTimestep(dim3 threadGrid, int numBlocks, curandState *rands, float* wg, int* states, int N_x, int NL, int t)
 {
-    d_updateStates<<< numBlocks, threadGrid >>>(states, wg, N_x, rands, NL, t);
+    int r = rand() / ( RAND_MAX / (N_x*N_x) );
+    d_updateStates<<< numBlocks, threadGrid >>>(states, wg, N_x, rands, NL, r);
     if (cudaSuccess != cudaGetLastError()) printf( "cuda error!\n" );
 
 }

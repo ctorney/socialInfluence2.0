@@ -11,10 +11,10 @@
 
 # set the number of GPU cards to use per node
 #SBATCH --gres=gpu:1
-#SBATCH --output=output/job.%J.out
+#SBATCH --output=output/STDOUT.%J.out
 
 # set max wallclock time
-#SBATCH --time=00:60:10
+#SBATCH --time=36:00:00
 
 
 
