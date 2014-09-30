@@ -10,7 +10,7 @@ import math as m
 import matplotlib as mpl
 
 K = 80       
-wg = 0.3
+wg = 0.25
 ws = 0.514
 
 def psw( j ):
@@ -38,10 +38,11 @@ thGriddown=np.zeros(numX+1)
 L = 0.15
 
         
-for ll in range(1,32,2):
+for ll in range(28,32,4):
     L =  0.5 #float(ll)*0.2
     Ns = ll * 2#min(64.0,2.0*m.floor(64.0*L))
     print Ns
+    Ns=32
     
     bp = Ns/float(numX)
     #print bp
@@ -63,5 +64,5 @@ for ll in range(1,32,2):
     pot=np.log(np.divide(thGriddown,thGridup))
     pot=np.cumsum(pot[1:64])
     plt.plot(xGrid[1:32],pot[1:32],label = str(float(ll)/float(numX)))
-    plt.axis([0, 0.5, -4, 6])
+    plt.axis([0, 0.5, -4, 20])
     
