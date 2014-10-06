@@ -10,7 +10,7 @@ import math as m
 import matplotlib as mpl
 
 K = 80       
-wg = 0.25
+wg = 0.3
 ws = 0.514
 
 def psw( j ):
@@ -42,11 +42,11 @@ for ll in range(28,32,4):
     L =  0.5 #float(ll)*0.2
     Ns = ll * 2#min(64.0,2.0*m.floor(64.0*L))
     print Ns
-    Ns=32
+    Ns=8
     
     bp = Ns/float(numX)
     #print bp
-    for fX in range(0,32):#0,numX+1):
+    for fX in range(0,58):#0,numX+1):
         X = fX/float(numX)
         Xs[fX] = X
     
@@ -59,10 +59,10 @@ for ll in range(28,32,4):
     for p in thGridup: print p
     for p in thGriddown: print p
     
-    #plt.plot(Xs[0:32],thGridup[0:32],label='theory up')
-    #plt.plot(Xs[0:32],thGriddown[0:32],label='theory up')
+    plt.plot(Xs[0:32],thGridup[0:32],label='theory up')
+    plt.plot(Xs[0:32],thGriddown[0:32],label='theory up')
     pot=np.log(np.divide(thGriddown,thGridup))
     pot=np.cumsum(pot[1:64])
-    plt.plot(xGrid[1:32],pot[1:32],label = str(float(ll)/float(numX)))
-    plt.axis([0, 0.5, -4, 20])
+    #plt.plot(xGrid[1:32],pot[1:32],label = str(float(ll)/float(numX)))
+    #plt.axis([0, 0.5, -4, 20])
     

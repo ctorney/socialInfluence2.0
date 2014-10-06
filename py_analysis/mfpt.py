@@ -48,7 +48,7 @@ for acount in range(0,numA):
     wg = 0.5 - 0.025 * float(acount)
     #wg = 0.325
     L =  0.15 #float(ll)*0.2
-    Ns = 32#min(64.0,2.0*m.floor(64.0*L))
+    Ns = 8#min(64.0,2.0*m.floor(64.0*L))
     
     bp = Ns/float(numX)    
     N2 = int(NA*0.5+1)
@@ -65,8 +65,7 @@ for acount in range(0,numA):
         Q[x,x] = 1.0 - tup(x/float(NA)) - tdown(x/float(NA))
         Q[x,x+1] = tup(x/float(NA))
     
-    fX=16
-    X = fX/float(numX)
+ 
     #print (1-X)*sum(sp.binomial(fX,j) * bp**j * (1-bp)**(fX-j) * tup2(j/float(Ns)) for j in xrange(0,fX+1)), tup(X)
     bb = np.matrix(np.linalg.inv(np.identity(N2) - Q))
     #for x in range(NA):
