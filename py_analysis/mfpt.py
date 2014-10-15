@@ -10,7 +10,7 @@ import matplotlib as mpl
 
 K = 80 
 wg = 0.2875
-ws = 0.514
+ws = 0.505
 alpha = 0.0
 NA = 64
 
@@ -25,7 +25,7 @@ def psw( j ):
 
 
 def pxbar( i, nup, bp ):
-    bp2 = float(nup-1)/float(numX)
+    bp2 = float(nup)/float(numX)
     return sp.binomial(Ns,i) * bp2**i* (1-bp2)**(Ns-i)* tup(i/float(Ns)) / sum(sp.binomial(Ns,j) * bp2**j* (1-bp2)**(Ns-j)* tup(j/float(Ns)) for j in xrange(0,Ns+1) )
     
 
@@ -57,17 +57,17 @@ def tdown2(X):
         return 0
     return (X)*sum(pxbar(j, fX,bp) * (tdown(j/float(Ns))) for j in xrange(0,Ns+1))
 
-numA = 11
+numA = 21
 alphas = np.zeros(numA)
 atimes = np.zeros(numA)
 
 numX = 64
 for acount in range(0,numA):
     alpha = 0.0#float(acount)/60.0
-    wg = 0.5 - 0.025 * float(acount)
+    wg = 0.5 - 0.0125 * float(acount)
     #wg = 0.275
     L =  0.15 #float(ll)*0.2
-    Ns = 16#min(64.0,2.0*m.floor(64.0*L))
+    Ns = 8#min(64.0,2.0*m.floor(64.0*L))
     
     bp = Ns/float(numX)    
     N2 = int(NA*0.5+1)
