@@ -12,7 +12,7 @@ K = 80
 wg = 0.2875
 ws = 0.514
 alpha = 0.0
-NA = 64
+NA = 16
 
 K = 80       
 wg = 0.275
@@ -25,7 +25,7 @@ def psw( j ):
 
 
 def pxbar( i, nup, bp ):
-    bp2 = float(nup-1)/float(numX)
+    bp2 = float(nup)/float(numX)
     return sp.binomial(Ns,i) * bp2**i* (1-bp2)**(Ns-i)* tup(i/float(Ns)) / sum(sp.binomial(Ns,j) * bp2**j* (1-bp2)**(Ns-j)* tup(j/float(Ns)) for j in xrange(0,Ns+1) )
     
 
@@ -57,17 +57,20 @@ def tdown2(X):
         return 0
     return (X)*sum(pxbar(j, fX,bp) * (tdown(j/float(Ns))) for j in xrange(0,Ns+1))
 
-numA = 11
+def phi(y): 
+    return np.prod([tdown2(float(zz)/NA)/tup2(float(zz)/NA) for zz in range(1,y+1)])
+
+numA = 1
 alphas = np.zeros(numA)
 atimes = np.zeros(numA)
 
-numX = 64
+numX = 16
 for acount in range(0,numA):
     alpha = 0.0#float(acount)/60.0
     wg = 0.5 - 0.025 * float(acount)
     #wg = 0.275
     L =  0.15 #float(ll)*0.2
-    Ns = 16#min(64.0,2.0*m.floor(64.0*L))
+    Ns = 28#min(64.0,2.0*m.floor(64.0*L))
     
     bp = Ns/float(numX)    
     N2 = int(NA*0.5+1)
@@ -95,6 +98,9 @@ for acount in range(0,numA):
 
 
     atimes[acount] = times[0]
+#atimes[acount] = sum([1.0/tup2((N2-m)/float(NA))   +  np.prod([tup2(i)/down2(i)  for i in range(1,m)] )      for m in range(1,N2+1)])
+    atimes[acount] = sum([phi(i)*sum([1.0/(tup2(float(z)/NA)*phi(z))  for z in range(0,i+1)])  for i in range(0,N2)] ) 
+#    atimes[acount] = sum([phi(i)  for i in range(1,N2)] ) 
     alphas[acount] = wg
 plt.plot(alphas,atimes)
 for a in range(np.size(atimes)): print atimes[a], alphas[a]
