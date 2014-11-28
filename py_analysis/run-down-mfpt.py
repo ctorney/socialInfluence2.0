@@ -9,6 +9,7 @@ import math as m
 import matplotlib as mpl
 
 NA = 64
+Ns = 8
 K = 80       
 ws = 0.514
 
@@ -28,34 +29,40 @@ def tup(X):
     return (1-X)*(ETSWUP(X)-ETSWUP2(X))/(1.0-ETSWUP(X))
 def tdown(X): 
     return (X)*(1.0-ETSWUP(X)-(VARTSWUP(X)/(ETSWUP(X))))   #(X)*(ETSWUP(X)-ETSWUP2(X))/(ETSWUP(X))
-   
-Xs = np.zeros(NA+1)
-thGridup=np.zeros(NA+1)
-thGriddown=np.zeros(NA+1)
-
-transP = np.zeros((NA+1,2))
-
-Ns=28
-wg = 0.3
-for fX in range(0,NA+1):#0,numX+1):
-    X = fX/float(NA)
-    Xs[fX] = X
-
-    #thGridup[fX] = (1-X)*sum(sp.binomial(fX,j) * bp**j * (1-bp)**(fX-j) * tup(j/float(Ns)) for j in xrange(0,fX+1))
-    thGridup[fX] = tup(X)#(1-X)*sum(pxbar2(j, fX,bp) * (tup(j/float(Ns))) for j in xrange(0,Ns+1))
-    thGriddown[fX] = tdown(X)
-    transP[fX,0] = thGridup[fX]
-    transP[fX,1] = thGriddown[fX]
-  
-xGrid=np.arange(65)/64.0
-plt.figure
-for p in thGridup: print p
-for p in thGriddown: print p
-
-np.save('an-potential-' + str(Ns) + '.npy',transP)
-
-plt.plot(Xs[0:32],thGridup[0:32],label='theory up')
-plt.plot(Xs[0:32],thGriddown[0:32],label='theory up')
-pot=np.log(np.divide(thGriddown,thGridup))
-pot=np.cumsum(pot[1:64])
     
+
+numA = 21
+alphas = np.zeros(numA)
+atimes = np.zeros(numA)
+
+
+for acount in range(0,numA):
+    wg = 0.5 - 0.0125 * float(acount)
+    
+    N2 = int(NA*0.5+1)
+    
+    Q = np.zeros((N2,N2))
+
+    Q[0,0]=1.0-tup(0)-tdown(0)
+    Q[0,1]=tup(0)
+
+    Q[N2-1,N2-2]=tdown(N2/float(NA))
+    Q[N2-1,N2-1]=1.0-tup(N2/float(NA))-tdown(N2/float(NA))
+    for x in range(1,N2-1):
+        Q[x,x-1] = tdown(x/float(NA))
+        Q[x,x] = 1.0 - tup(x/float(NA)) - tdown(x/float(NA))
+        Q[x,x+1] = tup(x/float(NA))
+    
+ 
+
+    bb = np.matrix(np.linalg.inv(np.identity(N2) - Q))
+    
+    times = bb*np.matrix(np.ones((N2,1)))
+
+
+    atimes[acount] = times[0]
+    alphas[acount] = wg
+
+plt.plot(alphas,atimes)
+plt.yscale('log')
+for a in range(np.size(atimes)): print alphas[a], atimes[a]
