@@ -11,7 +11,7 @@ from scipy import integrate
 from scipy import optimize
 
 NA = 64
-Ns = 18
+Ns = 8
 K = 80       
 ws = 0.514
 
@@ -29,23 +29,37 @@ def RHO(X):
 def ETSWUP2(X):  
     rh = RHO(X)
 
+ #   rh = 0.0
     sigma = rh + (1.0-rh)/float(Ns)
     NSS = int(round(1.0/sigma))
-    return sum(sp.binomial(NSS,j) * X**j* (1-X)**(NSS-j)* tswup(j/float(NSS)) for j in xrange(0,NSS+1))
+ #   return sum(sp.binomial(NSS,j) * X**j* (1-X)**(NSS-j)* tswup(j/float(NSS)) for j in xrange(0,NSS+1))
     A = m.sqrt(wg) - m.sqrt(wg)*np.log(ws/(1-ws))*K*(1.0)/(4*wg)
     B =  m.sqrt(wg)*np.log(ws/(1-ws))*K/(2.0*wg)
     O0 =  0.5 + 0.5*m.erf((A+B*X))
-    O2 = -0.5*(B**2/m.sqrt(m.pi))*(A+B*X)*m.exp(-(A+B*X)**2)
+    O2 = -(B**2/m.sqrt(m.pi))*(A+B*X)*m.exp(-(A+B*X)**2)
     return O0 + O2* X * (1-X) * sigma#sum(sp.binomial(Ns,j) * X**j* (1-X)**(Ns-j)* (j/float(Ns)-X)**2 for j in xrange(0,Ns+1))
     
+def ETSWUP3(X):  
+    rh = RHO(X)
+
+    rh = 0.0
+    sigma = rh + (1.0-rh)/float(Ns)
+    NSS = int(round(1.0/sigma))
+ #   return sum(sp.binomial(NSS,j) * X**j* (1-X)**(NSS-j)* tswup(j/float(NSS)) for j in xrange(0,NSS+1))
+    A = m.sqrt(wg) - m.sqrt(wg)*np.log(ws/(1-ws))*K*(1.0)/(4*wg)
+    B =  m.sqrt(wg)*np.log(ws/(1-ws))*K/(2.0*wg)
+    O0 =  0.5 + 0.5*m.erf((A))
+    O2 = -(B**2/m.sqrt(m.pi))*(A+B*X)*m.exp(-(A+B*X)**2)
+    return O0 + X * (m.exp(-A**2)/m.sqrt(m.pi))*B*(1-A*B/Ns)
+    return O0 + O2* X * (1-X) * sigma#sum(sp.binomial(Ns,j) * X**j* (1-X)**(Ns-j)* (j/float(Ns)-X)**2 for j in xrange(0,Ns+1))
 def VARTSWUP(X):  
     return sum(sp.binomial(Ns,j) * X**j* (1-X)**(Ns-j)* tswup(j/float(Ns))**2 for j in xrange(0,Ns+1))    - ETSWUP(X)**2
 def tup(X):
     #return 0.5
-    return (1-X)*(ETSWUP2(X))
+    return (1-X)*(ETSWUP3(X))
 def tdown(X): 
     #return 0.5
-    return (X)*(1.0-ETSWUP2(X))
+    return (X)*(1.0-ETSWUP3(X))
 def detODE(X):
     return np.array([sp.N(tup(X)-tdown(X))],dtype=float)
 def phi_int(y): 
@@ -82,7 +96,7 @@ def phix(x):
     ph, err = integrate.quad(intexp,N21,x+N21)
     return m.exp(-ph*NA)
 
-numA = 11
+numA = 1
 alphas = np.zeros(numA)
 atimes = np.zeros(numA)
 atimes2 = np.zeros(numA)
@@ -90,15 +104,15 @@ atimes2 = np.zeros(numA)
 
 for acount in range(numA):
     wg = 0.3 #- 0.0125 * float(acount)
-    alpha = 0.0 + acount/float(numA-1)
+    alpha = 1.0# + acount/float(numA-1)
     alphas[acount]=alpha
     
     N2 = int(NA*0.5+1)
 #    print "====================="
 #    print alpha
 #    print "====================="
-    #for x in range(0,NA):
-    #    print tup(x/float(NA)), tdown(x/float(NA))
+    for x in range(0,NA):
+        print tup(x/float(NA)), tdown(x/float(NA)), ETSWUP2(x/float(NA)), ETSWUP3(x/float(NA))
     
     Q = np.zeros((N2,N2))
 
