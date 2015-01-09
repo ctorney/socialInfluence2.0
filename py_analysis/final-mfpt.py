@@ -11,7 +11,7 @@ from scipy import integrate
 from scipy import optimize
 
 NA = 64
-Ns = 8
+Ns = 18
 K = 80       
 ws = 0.514
 
@@ -24,8 +24,26 @@ def ETSWUP(X):
 def RHO(X):  
     ap = 1.0-alpha
     PAB = (1.0/ETSWUP(X))*sum(sp.binomial(Ns,j) *(j/float(Ns))* X**j* (1-X)**(Ns-j)* tswup(j/float(Ns)) for j in xrange(0,Ns+1))
+    return PAB
     PABL = 0.75*ap**2 * PAB + (1.0-0.75*ap**2)*X
     return (PABL-X)/(1.0-X)
+def RHO2(X):  
+
+    PAB = (1.0/ETSWUP(X))*sum(sp.binomial(Ns,j) *(j/float(Ns))* X**j* (1-X)**(Ns-j)* tswup(j/float(Ns)) for j in xrange(0,Ns+1))
+    
+   
+
+    A = m.sqrt(wg) - m.sqrt(wg)*np.log(ws/(1-ws))*K*(1.0)/(4*wg)
+    B =  m.sqrt(wg)*np.log(ws/(1-ws))*K/(2.0*wg)
+    O0 =  0.5 + 0.5*m.erf((A+B*X))
+    O1 = (B/m.sqrt(m.pi))*m.exp(-(A+B*X)**2)
+    O2 = -(B **2/m.sqrt(m.pi))*(A+B*X)*m.exp(-(A+B*X)**2)
+    O1 = B*(-1.0*B*X*(A + B*X) )*m.exp(-(A + B*X)**2)/m.sqrt(m.pi)
+    O15 = B*m.exp(-(A + B*X)**2)/m.sqrt(m.pi)
+    
+    return X +  ( (O15)* X * (1-X) /float(Ns))/ (O0 + O2* X * (1-X) /float(Ns))#sum(sp.binomial(Ns,j) * X**j* (1-X)**(Ns-j)* (j/float(Ns)-X)**2 for j in xrange(0,Ns+1))
+    return (O0 * X + (O1+O15)* X * (1-X) /float(Ns))/ (O0 + O2* X * (1-X) /float(Ns))#sum(sp.binomial(Ns,j) * X**j* (1-X)**(Ns-j)* (j/float(Ns)-X)**2 for j in xrange(0,Ns+1))
+    return PAB
 def ETSWUP2(X):  
     rh = RHO(X)
 
@@ -56,10 +74,10 @@ def VARTSWUP(X):
     return sum(sp.binomial(Ns,j) * X**j* (1-X)**(Ns-j)* tswup(j/float(Ns))**2 for j in xrange(0,Ns+1))    - ETSWUP(X)**2
 def tup(X):
     #return 0.5
-    return (1-X)*(ETSWUP3(X))
+    return (1-X)*(ETSWUP2(X))
 def tdown(X): 
     #return 0.5
-    return (X)*(1.0-ETSWUP3(X))
+    return (X)*(1.0-ETSWUP2(X))
 def detODE(X):
     return np.array([sp.N(tup(X)-tdown(X))],dtype=float)
 def phi_int(y): 
@@ -111,8 +129,8 @@ for acount in range(numA):
 #    print "====================="
 #    print alpha
 #    print "====================="
-    for x in range(0,NA):
-        print tup(x/float(NA)), tdown(x/float(NA)), ETSWUP2(x/float(NA)), ETSWUP3(x/float(NA))
+#   for x in range(0,NA):
+#        print RHO(x/float(NA)), RHO2(x/float(NA)), ETSWUP2(x/float(NA)), ETSWUP(x/float(NA))
     
     Q = np.zeros((N2,N2))
 
