@@ -11,7 +11,7 @@ from scipy import integrate
 from scipy import optimize
 
 NA = 64
-Ns = 8
+Ns = 28
 K = 90       
 ws = 0.514
 
@@ -27,44 +27,48 @@ def ETSWUP(X):
 def RHO(X):  
     ap = 1.0-alpha
     PAB = (1.0/ETSWUP(X))*sum(sp.binomial(Ns,j) *(j/float(Ns))* X**j* (1-X)**(Ns-j)* tswup(j/float(Ns)) for j in xrange(0,Ns+1))
-    return PAB
-    PABL = 0.75*ap**2 * PAB + (1.0-0.75*ap**2)*X
+    PABL = ap * PAB + (1.0-ap)*X
     return (PABL-X)/(1.0-X)
 def RHO2(X):  
 
-    PAB = (1.0/ETSWUP(X))*sum(sp.binomial(Ns,j) *(j/float(Ns))* X**j* (1-X)**(Ns-j)* tswup(j/float(Ns)) for j in xrange(0,Ns+1))
+    ap = 1.0-alpha
+    A = np.log(K)/(2.0) - 1/sigma
+    B = np.log(K)
     
    
 
-    A = m.sqrt(wg) - m.sqrt(wg)*np.log(ws/(1-ws))*K*(1.0)/(4*wg)
-    B =  m.sqrt(wg)*np.log(ws/(1-ws))*K/(2.0*wg)
-    O0 =  0.5 + 0.5*m.erf((A+B*X))
-    O1 = (B/m.sqrt(m.pi))*m.exp(-(A+B*X)**2)
-    O2 = -(B **2/m.sqrt(m.pi))*(A+B*X)*m.exp(-(A+B*X)**2)
-    O1 = B*(-1.0*B*X*(A + B*X) )*m.exp(-(A + B*X)**2)/m.sqrt(m.pi)
-    O15 = B*m.exp(-(A + B*X)**2)/m.sqrt(m.pi)
     
-    return X +  ( (O15)* X * (1-X) /float(Ns))/ (O0 + O2* X * (1-X) /float(Ns))#sum(sp.binomial(Ns,j) * X**j* (1-X)**(Ns-j)* (j/float(Ns)-X)**2 for j in xrange(0,Ns+1))
+    return ap* ( (B)* X  )/ (float(Ns) + 0.5*B**2 * X * (1-X) )#sum(sp.binomial(Ns,j) * X**j* (1-X)**(Ns-j)* (j/float(Ns)-X)**2 for j in xrange(0,Ns+1))
     return (O0 * X + (O1+O15)* X * (1-X) /float(Ns))/ (O0 + O2* X * (1-X) /float(Ns))#sum(sp.binomial(Ns,j) * X**j* (1-X)**(Ns-j)* (j/float(Ns)-X)**2 for j in xrange(0,Ns+1))
     return PAB
 def ETSWUP2(X):  
-    rh = RHO(X)
 
-    rh = 0.0
+    A = np.log(K)/(2.0) - 1/sigma
+    B = np.log(K)
+    rh =  alpha * ( (B)* X  )/ (float(Ns) + 0.5*B**2 * X * (1-X) )
+    KK =   0.5*B**2 * X * (1-X) / float(Ns)
+    rh =  alpha * ( (B)* X  )/ (float(Ns)*(1+KK) )
     sigma_2 = rh + (1.0-rh)/float(Ns)
-    gc = np.log(K)*sigma*(1.0-2.0*X)/(2.0)
-    return 0.5*m.exp(-(gc-1.0)/sigma)*(1.0 + 0.5*np.log(K)**2* X * (1-X) * sigma_2)
-def TAYLOR(X):  
-    rh = RHO(X)
+    return 0.5*m.exp(-(A-B*X))*(1.0 + KK*(1.0 + ((alpha*B*X/(1+KK)) * (1.0- (1.0/float(Ns))))))
+    return 0.5*m.exp(-(A-B*X))*(1.0 + 0.5*B**2* X * (1-X) * sigma_2)
+
+def X1():  
+#rh = RHO(X)
 
     rh = 0.0
     sigma_2 = rh + (1.0-rh)/float(Ns)
     A = np.log(K)/(2.0) - 1/sigma
     B = np.log(K)
     return 0.5*( m.exp(-(A))  ) / ( 1.0 -  0.5*( m.exp(-(A))  ) *(B +  0.5*B**2*   sigma_2) ) 
-    return 0.5*( m.exp(-(A))  )  +  X* 0.5*( m.exp(-(A))  ) *(B +  0.5*B**2*   sigma_2)
-    
-    return 0.5*m.exp(-(A-B*X))*(1.0 + 0.5*np.log(K)**2* X * (1-X) * sigma_2)
+def X2(X):  
+#rh = RHO(X)
+
+    A = np.log(K)/(2.0) - 1/sigma
+    B = np.log(K)
+    rh =  alpha * ( (B)* X  )/ (float(Ns) + 0.5*B**2 * X * (1-X) )#sum(sp.binomial(Ns,j) * X**j* (1-X)**(Ns-j)* (j/float(Ns)-X)**2 for j in xrange(0,Ns+1))
+    sigma_2 = rh + (1.0-rh)/float(Ns)
+    return 0.5*(1+(B*X-A) )*(1.0 + 0.5*B**2* X * (1-X) * sigma_2)
+   
 def ETSWUP3(X):  
     rh = RHO(X)
 
@@ -132,15 +136,15 @@ atimes2 = np.zeros(numA)
 for acount in range(numA):
     sigma  = 130.0 #- 0.0125 * float(acount)
     wg  = 0.3 #- 0.0125 * float(acount)
-    alpha = 1.0# + acount/float(numA-1)
+    alpha = 0.4# + acount/float(numA-1)
     alphas[acount]=alpha
     
     N2 = int(NA*0.5+1)
 #    print "====================="
 #    print alpha
 #    print "====================="
-    for x in range(0,NA):
-        print ETSWUP2(x/float(NA))
+#    for x in range(0,NA):
+#        print ETSWUP2(x/float(NA)), X2(x/float(NA))
     
     Q = np.zeros((N2,N2))
 
@@ -162,8 +166,10 @@ for acount in range(numA):
 
    
 #    atimes[acount] = times[0]
-aa= np.arange(65)/float(2*NA)
-for a in range(np.size(atimes)): print alphas[a], atimes[a]
-plt.plot(aa, [ETSWUP(i) for i in aa])
-plt.plot(aa, [ETSWUP2(i) for i in aa])
-plt.show()
+print ETSWUP2(0.1)
+
+#aa= np.arange(65)/float(2*NA)
+#for a in range(np.size(atimes)): print alphas[a], atimes[a]
+#plt.plot(aa, [RHO(i) for i in aa])
+#plt.plot(aa, [RHO2(i) for i in aa])
+#plt.show()
