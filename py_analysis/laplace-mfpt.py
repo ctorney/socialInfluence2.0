@@ -47,7 +47,7 @@ def ETSWUP2(X):
     B = np.log(K)
     rh =  alpha * ( (B)* X  )/ (float(Ns) + 0.5*B**2 * X * (1-X) )
     KK =   0.5*B**2 * X * (1-X) / float(Ns)
-    rh =  alpha * ( (B)* X  )/ (float(Ns)*(1+KK) )
+
     sigma_2 = rh + (1.0-rh)/float(Ns)
     return 0.5*m.exp(-(A-B*X))*(1.0 + KK*(1.0 + ((alpha*B*X/(1+KK)) * (1.0- (1.0/float(Ns))))))
     return 0.5*m.exp(-(A-B*X))*(1.0 + 0.5*B**2* X * (1-X) * sigma_2)
@@ -62,6 +62,12 @@ def X1():
     return 0.5*( m.exp(-(A))  ) / ( 1.0 -  0.5*( m.exp(-(A))  ) *(B +  0.5*B**2*   sigma_2) ) 
 def X2(X):  
 #rh = RHO(X)
+    A = np.log(K)/(2.0) - 1/sigma
+    B = np.log(K)
+    rh =  alpha * ( (B)* X  )/ (float(Ns) + 0.5*B**2 * X * (1-X) )
+    KK =   0.5*B**2 * X * (1-X) / float(Ns)
+    sigma_2 = rh + (1.0-rh)/float(Ns)
+    return 0.5*m.exp(-(A-B*X))*(1.0 +  (0.5*B**2 * X * (1-X) / float(Ns))*(1.0 + ((alpha*B*X/(1+ (0.5*B**2 * X * (1-X) / float(Ns)))) * (1.0- (1.0/float(Ns))))))
 
     A = np.log(K)/(2.0) - 1/sigma
     B = np.log(K)
