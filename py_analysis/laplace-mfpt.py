@@ -64,9 +64,11 @@ def X2(X):
 #rh = RHO(X)
     A = np.log(K)/(2.0) - 1/sigma
     B = np.log(K)
+    VR = B**2*X*(1-X)/float(Ns)
     rh =  alpha * ( (B)* X  )/ (float(Ns) + 0.5*B**2 * X * (1-X) )
     KK =   0.5*B**2 * X * (1-X) / float(Ns)
     sigma_2 = rh + (1.0-rh)/float(Ns)
+    return 0.5*m.exp(-(A-B*X))*(1.0 +  VR + ((VR/(1.0+VR))*alpha * B * X * (Ns-1)/float(Ns)))
     return 0.5*m.exp(-(A-B*X))*(1.0 +  (0.5*B**2 * X * (1-X) / float(Ns))*(1.0 + ((alpha*B*X/(1+ (0.5*B**2 * X * (1-X) / float(Ns)))) * (1.0- (1.0/float(Ns))))))
 
     A = np.log(K)/(2.0) - 1/sigma

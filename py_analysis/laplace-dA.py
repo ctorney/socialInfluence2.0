@@ -11,7 +11,7 @@ from scipy import integrate
 from scipy import optimize
 
 NA = 64
-Ns = 18
+Ns = 8
 K = 90       
 ws = 0.514
 
@@ -41,7 +41,7 @@ def ETSWUPZAPROX(X):
     A = np.log(K)/(2.0) - 1/sigma
     B = np.log(K)
     VR = 0.5*B**2*X*(1-X)/float(Ns)
-    return 0.5*m.exp(-(A-B*X))*(1.0 +  VR +  ((VR/(1.0+VR))*alpha * B * X * (Ns-1)/float(Ns)))
+    return m.exp(-A)*0.5*m.exp((B*X))*(1.0 +  VR +  ((VR/(1.0+VR))*alpha * B * X * (Ns-1)/float(Ns)))
 def X1():  
     A = np.log(K)/(2.0) - 1/sigma
     B = np.log(K)
@@ -68,10 +68,10 @@ def diffdown(x):
 
 def diffup(x):
     h=0.0001
-    return (tup2(x+0.5*h)-tup2(x-0.5*h))/h
+    return (m.exp(-0)*tup2(x+0.5*h)-m.exp(-0)*tup2(x-0.5*h))/h
     
 def diff2phi(x):
-    return -((1.0/tup2(x))*diffup(x)-(1.0/tdown2(x))*diffdown(x))
+    return -((1.0/(m.exp(-0)*tup2(x)))*diffup(x)-(1.0/tdown2(x))*diffdown(x))
    
 def tup(X):
     return (1-X)*(ETSWUPZALPHA(X))
@@ -82,12 +82,15 @@ def tup3(X, s):
 def tdown3(X,s): 
     return (X)*(1.0-ETSWUPZALPHA2(X,s))
 def tup2(X):
-    return (1-X)*(ETSWUPZAPROX(X))
+    B = np.log(K)
+    VR = 0.5*B**2*X*(1-X)/float(Ns)
+    return 0.5*m.exp((B*X))*(1.0 +  VR +  ((VR/(1.0+VR))*alpha * B * X * (Ns-1)/float(Ns)))
 def tdown2(X): 
-    return (X)*(1.0-ETSWUPZAPROX(X))
+    return (X)
     
 def phi(x): 
     N21 = 0.5/int(NA)
+    #intexp = lambda y: -m.log(m.exp(-A)*tup2(y)/tdown2(y))
     intexp = lambda y: -m.log(tup2(y)/tdown2(y))
     if x<N21:
         return 0
@@ -169,33 +172,14 @@ for acount in range(numA):
    
     #print sigma, times[0]
     atimes[acount] = times[0]
-    Q = np.zeros((N2,N2))
-
-    Q[0,0]=1.0-tup2(0)-tdown2(0)
-    Q[0,1]=tup2(0)+tdown2(0)
-
-    Q[N2-1,N2-2]=tdown2(N2/float(NA))
-    Q[N2-1,N2-1]=1.0-tup2(N2/float(NA))-tdown2(N2/float(NA))
-    for x in range(1,N2-1):
-        Q[x,x-1] = tdown2(x/float(NA))
-        Q[x,x] = 1.0 - tup2(x/float(NA)) - tdown2(x/float(NA))
-        Q[x,x+1] = tup2(x/float(NA))
-    
- 
-
-    bb = np.matrix(np.linalg.inv(np.identity(N2) - Q))
-    
-    times = bb*np.matrix(np.ones((N2,1)))
-
-   
-    atimes2[acount] = times[0]
 
     x1=X1()
     shiftx=0.25
     x3=optimize.fsolve(detODE,x1+shiftx)[0]
     dx12 =diff2phi(x1)
     dx32 =diff2phi(x3)
-    atimes2[acount] = NA*(tup(x1)**-1*(abs(dx12*dx32))**-0.5)*2.0*3.142*m.exp(NA*(phi(x3)-phi(x1)))
+    atimes2[acount] = NA*((m.exp(-0)*tup2(x1))**-1*(abs(dx12*dx32))**-0.5)*2.0*3.142*m.exp(A + NA*(A*(x3-x1)) + (NA*( phi(x3)-phi(x1))))
+    atimes2[acount] = (sigma**-2)*(1.0 + NA*((x3-x1)))# + (NA*( phi(x3)-phi(x1))))
 #print ETSWUP2(0.1)
 
 #aa= np.arange(65)/float(2*NA)
@@ -203,7 +187,7 @@ for acount in range(numA):
 #plt.plot(aa, [RHO(i) for i in aa])
 #atimes = (np.log(atimes))
 atimes = (np.log(atimes))
-atimes2 = (np.log(atimes2))
+#atimes2 = (np.log(atimes2))
 plt.plot(sigs, atimes)
 plt.plot(sigs, atimes2)
 #plt.yscale('log')
